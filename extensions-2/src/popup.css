@@ -14,7 +14,7 @@
   --accent-soft: #c9bdec;
   --shadow: rgba(84, 63, 122, 0.14);
   --warn: #b84a3a;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Nunito Sans", Arial, Helvetica, sans-serif;
 }
 
 * {
@@ -39,7 +39,7 @@ textarea {
 }
 
 .app {
-  padding: 22px;
+  padding: 30px 22px 22px;
 }
 
 .top {
@@ -71,18 +71,26 @@ h1 {
 
 .add-button {
   flex: 0 0 auto;
-  min-height: 44px;
-  border: 0;
+  min-height: 46px;
+  border: 1px solid rgba(221, 213, 226, 0.9);
   border-radius: 999px;
-  padding: 0 18px;
-  background: var(--soft);
-  color: var(--text);
-  font-weight: 700;
+  padding: 0 24px;
+  background: linear-gradient(145deg, #fff7e8, #fffefe);
+  box-shadow:
+    0 10px 22px rgba(88, 66, 126, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  color: #37305b;
+  font-size: 17px;
+  font-weight: 800;
   cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .add-button:hover {
-  box-shadow: 0 8px 18px var(--shadow);
+  box-shadow:
+    0 12px 26px rgba(88, 66, 126, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
 }
 
 .reminder-list {
@@ -241,31 +249,64 @@ textarea {
 
 .card-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: 1fr 1fr 46px;
+  gap: 10px;
+  align-items: center;
   padding-top: 4px;
+}
+
+.card-actions.no-delete {
+  grid-template-columns: 1fr 1fr;
 }
 
 .card-actions button {
   min-height: 46px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--text);
+  border: 1px solid #d8cee9;
+  border-radius: 18px;
+  background: #f3edf5;
+  color: #4d416d;
   cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .card-actions button:hover {
-  box-shadow: 0 8px 18px var(--shadow);
+  border-color: #c5b6e3;
+  box-shadow: 0 8px 18px rgba(88, 66, 126, 0.14);
+  transform: translateY(-1px);
 }
 
 .card-actions .primary {
-  background: var(--accent);
+  border-color: #7449e8;
+  background: linear-gradient(135deg, #7c4dff, #693fe0);
   color: white;
 }
 
 .card-actions .primary:hover {
-  background: var(--accent-dark);
+  border-color: #693fe0;
+  background: linear-gradient(135deg, #865bff, #5d35c9);
+}
+
+.delete-button {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  padding: 0;
+}
+
+.delete-button svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: #7b708c;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.delete-button:hover svg {
+  stroke: var(--warn);
 }
 
 .status {

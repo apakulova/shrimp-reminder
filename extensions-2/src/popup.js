@@ -97,7 +97,7 @@ function createReminderCard(reminder) {
   intervalInput.step = "1";
 
   const actions = document.createElement("div");
-  actions.className = "card-actions";
+  actions.className = `card-actions${reminder.id === "eyes" ? " no-delete" : ""}`;
 
   const saveButton = document.createElement("button");
   saveButton.className = "primary";
@@ -110,11 +110,31 @@ function createReminderCard(reminder) {
   }));
 
   const testButton = document.createElement("button");
+  testButton.className = "secondary";
   testButton.type = "button";
   testButton.textContent = "Проверить";
   testButton.addEventListener("click", () => testReminder(reminder.id));
 
   actions.append(saveButton, testButton);
+
+  if (reminder.id !== "eyes") {
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "delete-button";
+    deleteButton.type = "button";
+    deleteButton.setAttribute("aria-label", `Удалить напоминание ${reminder.title}`);
+    deleteButton.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h16" />
+        <path d="M10 11v6" />
+        <path d="M14 11v6" />
+        <path d="M6 7l1 14h10l1-14" />
+        <path d="M9 7V4h6v3" />
+      </svg>
+    `;
+    deleteButton.addEventListener("click", () => deleteReminder(reminder.id));
+    actions.append(deleteButton);
+  }
+
   details.append(titleLabel.wrapper, subtitleLabel.wrapper, intervalLabel.wrapper, actions);
   card.append(summary, details);
 
@@ -168,6 +188,17 @@ async function testReminder(reminderId) {
   }
 
   showStatus("Проверочное напоминание отправлено.");
+}
+
+async function deleteReminder(reminderId) {
+  settings.reminders = settings.reminders.filter((reminder) => reminder.id !== reminderId);
+
+  if (openReminderId === reminderId) {
+    openReminderId = "";
+  }
+
+  await persistSettings("Напоминание удалено.");
+  renderReminders();
 }
 
 function updateReminder(reminderId, changes) {
