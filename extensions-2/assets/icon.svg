@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="Не будь креветкой">
+  <rect width="128" height="128" rx="28" fill="#fff4e3"/>
+  <path d="M96 34c12 10 16 27 9 43-9 20-34 29-55 20-20-8-31-28-25-45 5-14 19-23 35-23" fill="none" stroke="#cc5a47" stroke-width="11" stroke-linecap="round"/>
+  <path d="M84 31c-14-10-37-8-49 5-10 11-8 27 4 34 12 8 30 4 39-9" fill="#f47c68" stroke="#8f352c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M47 40c8 7 14 17 16 29M62 34c6 8 10 17 11 27" fill="none" stroke="#ffb29d" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="38" cy="44" r="5" fill="#201b16"/>
+  <path d="M32 36c-7-8-13-10-19-8M35 34c-3-10-7-15-14-19" fill="none" stroke="#8f352c" stroke-width="4" stroke-linecap="round"/>
+  <path d="M83 81c9 2 17 0 24-6M77 91c7 6 16 8 27 6M62 95c3 8 9 14 18 17" fill="none" stroke="#cc5a47" stroke-width="6" stroke-linecap="round"/>
+  <path d="M84 31c8-3 16-2 22 4" fill="none" stroke="#8f352c" stroke-width="5" stroke-linecap="round"/>
+</svg>
