@@ -161,8 +161,8 @@ async function openReminderWindow() {
     await chrome.windows.create({
       url,
       type: "popup",
-      width: 520,
-      height: 460,
+      width: 560,
+      height: 560,
       focused: true
     });
   } catch (error) {
