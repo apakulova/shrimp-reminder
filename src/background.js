@@ -183,8 +183,8 @@ async function showSystemNotification(reminder) {
       priority: 2,
       requireInteraction: true,
       buttons: [
-        { title: "Сделано" },
-        { title: `Напомни через ${SNOOZE_MINUTES} минут` }
+        { title: "Спасибо 🤍" },
+        { title: `Напомнить через ${SNOOZE_MINUTES} минут` }
       ]
     });
   } catch (error) {
