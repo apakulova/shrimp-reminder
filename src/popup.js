@@ -89,7 +89,7 @@ function createReminderCard(reminder) {
 
   const titleLabel = createField("Заголовок", "input", reminder.title);
   const subtitleLabel = createField("Текст", "textarea", reminder.subtitle);
-  const intervalLabel = createField("Интервал, минут", "input", reminder.intervalMinutes);
+  const intervalLabel = createField("Через сколько минут", "input", reminder.intervalMinutes);
   const intervalInput = intervalLabel.field;
   intervalInput.type = "number";
   intervalInput.min = "1";
