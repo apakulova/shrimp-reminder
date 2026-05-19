@@ -12,6 +12,8 @@
   --soft: #fff1cc;
   --secondary: #f3edf5;
   --shadow: rgba(84, 63, 122, 0.16);
+  --radius-surface: 24px;
+  --radius-control: 18px;
   font-family: "Nunito Sans", Arial, Helvetica, sans-serif;
 }
 
@@ -45,7 +47,7 @@ body {
   flex-direction: column;
   justify-content: center;
   border: 1px solid var(--line);
-  border-radius: 28px;
+  border-radius: var(--radius-surface);
   background: var(--surface);
   box-shadow: 0 16px 38px var(--shadow);
   padding: 26px 32px;
@@ -59,7 +61,7 @@ body {
   width: 84px;
   height: 84px;
   margin-bottom: 16px;
-  border-radius: 26px;
+  border-radius: var(--radius-surface);
   background: var(--soft);
   font-size: 58px;
   line-height: 1;
@@ -90,7 +92,7 @@ p {
 button {
   min-height: 48px;
   border: 1px solid #d8cee9;
-  border-radius: 18px;
+  border-radius: var(--radius-control);
   background: var(--secondary);
   color: #4d416d;
   font: inherit;
