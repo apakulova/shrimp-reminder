@@ -41,6 +41,19 @@ const DEFAULT_SETTINGS = {
   reminders: DEFAULT_REMINDERS
 };
 
+const CUSTOM_REMINDER_EMOJIS = [
+  "✨",
+  "☕",
+  "🌸",
+  "🫧",
+  "🍋",
+  "🪴",
+  "🧡",
+  "⭐",
+  "🌈",
+  "🫶"
+];
+
 const STORAGE_KEYS = {
   settings: "careReminderSettings",
   activeReminder: "careActiveReminder"
@@ -76,13 +89,18 @@ function cloneReminder(reminder) {
 function createCustomReminder() {
   return {
     id: createReminderId(),
-    title: "Свое напоминание",
+    title: "Новое напоминание",
     subtitle: "Напиши здесь то, что хочется услышать от себя.",
-    emoji: "✨",
+    emoji: getRandomCustomReminderEmoji(),
     intervalMinutes: 30,
     isEnabled: false,
     isCustom: true
   };
+}
+
+function getRandomCustomReminderEmoji() {
+  const index = Math.floor(Math.random() * CUSTOM_REMINDER_EMOJIS.length);
+  return CUSTOM_REMINDER_EMOJIS[index];
 }
 
 function createReminderId() {
