@@ -1,41 +1,25 @@
 const DEFAULT_REMINDERS = [
   {
     id: "eyes",
-    title: "Пора закапать глаза",
-    subtitle: "Пара секунд сейчас — и глазам будет спокойнее.",
-    emoji: "💧",
-    intervalMinutes: 20,
+    title: "Время закапать глаза",
+    subtitle: "Отвлекись от экрана и посмотри вдаль —\nэто даст глазам небольшую передышку",
+    emoji: "👁️",
+    intervalMinutes: 120,
     isEnabled: true,
     isCustom: false
   },
   {
-    id: "water",
-    title: "Время воды",
-    subtitle: "Сделай несколько глотков и проверь, как ты себя чувствуешь.",
-    emoji: "🥛",
-    intervalMinutes: 45,
-    isEnabled: false,
-    isCustom: false
-  },
-  {
-    id: "back",
-    title: "Разомни спину",
-    subtitle: "Встань, расправь плечи и мягко потянись.",
+    id: "movement",
+    title: "Пора немного размяться",
+    subtitle: "Встань, потянись, пройдись пару минут —\nспина скажет спасибо",
     emoji: "🧘",
     intervalMinutes: 60,
     isEnabled: false,
     isCustom: false
-  },
-  {
-    id: "breath",
-    title: "Пауза на дыхание",
-    subtitle: "Сделай пять медленных вдохов и выдохов.",
-    emoji: "🌿",
-    intervalMinutes: 30,
-    isEnabled: false,
-    isCustom: false
   }
 ];
+
+const LOCKED_REMINDER_IDS = DEFAULT_REMINDERS.map((reminder) => reminder.id);
 
 const DEFAULT_SETTINGS = {
   reminders: DEFAULT_REMINDERS
@@ -120,24 +104,90 @@ function normalizeMinutes(value, fallback) {
 function normalizeSettings(settings) {
   if (settings && Array.isArray(settings.reminders)) {
     return {
-      reminders: settings.reminders.map(cloneReminder)
+      reminders: normalizeReminderList(settings.reminders)
     };
   }
 
   if (settings && settings.reminder) {
     return {
-      reminders: [
-        cloneReminder({
+      reminders: normalizeReminderList([
+        {
           ...settings.reminder,
           isEnabled: settings.isEnabled
-        })
-      ]
+        }
+      ])
     };
   }
 
   return {
     reminders: DEFAULT_REMINDERS.map(cloneReminder)
   };
+}
+
+function normalizeReminderList(reminders) {
+  const normalizedReminders = reminders
+    .map(getMigratedReminder)
+    .filter(Boolean)
+    .map(cloneReminder);
+  const remindersById = new Map(normalizedReminders.map((reminder) => [reminder.id, reminder]));
+  const defaultReminders = DEFAULT_REMINDERS.map((reminder) => remindersById.get(reminder.id) || cloneReminder(reminder));
+  const customReminders = normalizedReminders.filter((reminder) => !isLockedReminder(reminder.id));
+
+  return [...defaultReminders, ...customReminders];
+}
+
+function getMigratedReminder(reminder) {
+  if (
+    reminder.id === "eyes" &&
+    reminder.title === "Пора закапать глаза" &&
+    reminder.subtitle === "Пара секунд сейчас — и глазам будет спокойнее." &&
+    reminder.emoji === "💧" &&
+    normalizeMinutes(reminder.intervalMinutes, 20) === 20
+  ) {
+    return {
+      ...DEFAULT_REMINDERS[0],
+      isEnabled: reminder.isEnabled
+    };
+  }
+
+  if (
+    reminder.id === "back" &&
+    reminder.title === "Разомни спину" &&
+    reminder.subtitle === "Встань, расправь плечи и мягко потянись." &&
+    reminder.emoji === "🧘" &&
+    normalizeMinutes(reminder.intervalMinutes, 60) === 60
+  ) {
+    return {
+      ...DEFAULT_REMINDERS[1],
+      isEnabled: reminder.isEnabled
+    };
+  }
+
+  if (
+    reminder.id === "water" &&
+    reminder.title === "Время воды" &&
+    reminder.subtitle === "Сделай несколько глотков и проверь, как ты себя чувствуешь." &&
+    reminder.emoji === "🥛" &&
+    normalizeMinutes(reminder.intervalMinutes, 45) === 45
+  ) {
+    return null;
+  }
+
+  if (
+    reminder.id === "breath" &&
+    reminder.title === "Пауза на дыхание" &&
+    reminder.subtitle === "Сделай пять медленных вдохов и выдохов." &&
+    reminder.emoji === "🌿" &&
+    normalizeMinutes(reminder.intervalMinutes, 30) === 30
+  ) {
+    return null;
+  }
+
+  return reminder;
+}
+
+function isLockedReminder(reminderId) {
+  return LOCKED_REMINDER_IDS.includes(reminderId);
 }
 
 function getScheduleAlarmName(reminderId) {

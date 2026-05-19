@@ -96,8 +96,9 @@ function createReminderCard(reminder) {
   intervalInput.max = "1440";
   intervalInput.step = "1";
 
+  const isLocked = isLockedReminder(reminder.id);
   const actions = document.createElement("div");
-  actions.className = `card-actions${reminder.id === "eyes" ? " no-delete" : ""}`;
+  actions.className = `card-actions${isLocked ? " no-delete" : ""}`;
 
   const saveButton = document.createElement("button");
   saveButton.className = "primary";
@@ -117,7 +118,7 @@ function createReminderCard(reminder) {
 
   actions.append(saveButton, testButton);
 
-  if (reminder.id !== "eyes") {
+  if (!isLocked) {
     const deleteButton = document.createElement("button");
     deleteButton.className = "delete-button";
     deleteButton.type = "button";
@@ -191,6 +192,11 @@ async function testReminder(reminderId) {
 }
 
 async function deleteReminder(reminderId) {
+  if (isLockedReminder(reminderId)) {
+    showStatus("Это системное напоминание нельзя удалить.", true);
+    return;
+  }
+
   settings.reminders = settings.reminders.filter((reminder) => reminder.id !== reminderId);
 
   if (openReminderId === reminderId) {
