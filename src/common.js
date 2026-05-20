@@ -12,7 +12,7 @@ const DEFAULT_REMINDERS = [
     id: "movement",
     title: "Пора немного размяться",
     subtitle: "Встань, потянись, пройдись пару минут —\nспина скажет спасибо",
-    emoji: "🧘",
+    emoji: "🦐",
     intervalMinutes: 60,
     isEnabled: false,
     isCustom: false
@@ -154,6 +154,19 @@ function getMigratedReminder(reminder) {
     reminder.id === "back" &&
     reminder.title === "Разомни спину" &&
     reminder.subtitle === "Встань, расправь плечи и мягко потянись." &&
+    reminder.emoji === "🧘" &&
+    normalizeMinutes(reminder.intervalMinutes, 60) === 60
+  ) {
+    return {
+      ...DEFAULT_REMINDERS[1],
+      isEnabled: reminder.isEnabled
+    };
+  }
+
+  if (
+    reminder.id === "movement" &&
+    reminder.title === "Пора немного размяться" &&
+    reminder.subtitle === "Встань, потянись, пройдись пару минут —\nспина скажет спасибо" &&
     reminder.emoji === "🧘" &&
     normalizeMinutes(reminder.intervalMinutes, 60) === 60
   ) {
