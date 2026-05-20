@@ -40,7 +40,8 @@ const CUSTOM_REMINDER_EMOJIS = [
 
 const STORAGE_KEYS = {
   settings: "careReminderSettings",
-  activeReminder: "careActiveReminder"
+  activeReminder: "careActiveReminder",
+  pendingReminders: "carePendingReminders"
 };
 
 const ALARM_PREFIXES = {
@@ -57,6 +58,7 @@ const NOTIFICATION_PREFIX = "careReminderNotification:";
 const REMINDER_WINDOW_PATH = "src/reminder.html";
 const SOUND_PATH = "src/sound.html";
 const SNOOZE_MINUTES = 10;
+const IDLE_DETECTION_SECONDS = 60;
 
 function cloneReminder(reminder) {
   return {

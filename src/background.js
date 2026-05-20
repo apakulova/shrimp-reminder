@@ -1,5 +1,7 @@
 importScripts("common.js");
 
+chrome.idle.setDetectionInterval(IDLE_DETECTION_SECONDS);
+
 chrome.runtime.onInstalled.addListener(async () => {
   const settings = await getSettings();
   await chrome.storage.local.set({ [STORAGE_KEYS.settings]: settings });
@@ -35,6 +37,11 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     return;
   }
 
+  if (!(await isComputerActive())) {
+    await queuePendingReminder(reminder.id);
+    return;
+  }
+
   await showReminder(reminder, alarm.name);
 });
 
@@ -58,6 +65,15 @@ chrome.notifications.onClosed.addListener(async (notificationId) => {
   if (isCareNotification(notificationId)) {
     await stopSound();
   }
+});
+
+chrome.idle.onStateChanged.addListener((state) => {
+  if (state === "active") {
+    showPendingReminder().catch((error) => console.error(error));
+    return;
+  }
+
+  silenceActiveReminder().catch((error) => console.error(error));
 });
 
 async function handleMessage(message) {
@@ -116,7 +132,89 @@ async function getSettings() {
 
 async function getActiveReminder() {
   const result = await chrome.storage.local.get(STORAGE_KEYS.activeReminder);
-  return cloneReminder(result[STORAGE_KEYS.activeReminder] || DEFAULT_REMINDERS[0]);
+  const activeReminder = result[STORAGE_KEYS.activeReminder] || DEFAULT_REMINDERS[0];
+
+  return {
+    ...cloneReminder(activeReminder),
+    source: activeReminder.source || ""
+  };
+}
+
+async function isComputerActive() {
+  const state = await chrome.idle.queryState(IDLE_DETECTION_SECONDS);
+  return state === "active";
+}
+
+async function getPendingReminderIds() {
+  const result = await chrome.storage.local.get(STORAGE_KEYS.pendingReminders);
+  const pendingReminders = result[STORAGE_KEYS.pendingReminders];
+
+  if (!Array.isArray(pendingReminders)) {
+    return [];
+  }
+
+  return pendingReminders.filter((reminderId) => typeof reminderId === "string");
+}
+
+async function queuePendingReminder(reminderId) {
+  const pendingReminderIds = await getPendingReminderIds();
+
+  if (pendingReminderIds.includes(reminderId)) {
+    return;
+  }
+
+  await chrome.storage.local.set({
+    [STORAGE_KEYS.pendingReminders]: [...pendingReminderIds, reminderId]
+  });
+}
+
+async function showPendingReminder() {
+  if (!(await isComputerActive())) {
+    return;
+  }
+
+  const pendingReminderIds = await getPendingReminderIds();
+
+  if (!pendingReminderIds.length) {
+    return;
+  }
+
+  const settings = await getSettings();
+  const reminder = pendingReminderIds
+    .map((reminderId) => settings.reminders.find((item) => item.id === reminderId && item.isEnabled))
+    .find(Boolean);
+
+  if (!reminder) {
+    await chrome.storage.local.set({ [STORAGE_KEYS.pendingReminders]: [] });
+    return;
+  }
+
+  await chrome.storage.local.set({
+    [STORAGE_KEYS.pendingReminders]: pendingReminderIds.filter((reminderId) => reminderId !== reminder.id)
+  });
+  await showReminder(reminder, "pending");
+}
+
+async function silenceActiveReminder() {
+  const activeReminder = await getActiveReminder();
+  await stopSound();
+
+  if (!activeReminder.source) {
+    return;
+  }
+
+  const notificationId = getNotificationId(activeReminder.id);
+  const notifications = await chrome.notifications.getAll();
+
+  if (!notifications[notificationId]) {
+    return;
+  }
+
+  await chrome.notifications.clear(notificationId);
+
+  if (activeReminder.source !== "test") {
+    await queuePendingReminder(activeReminder.id);
+  }
 }
 
 async function refreshSchedules(settings) {
@@ -230,6 +328,8 @@ async function completeReminder(reminderId) {
       periodInMinutes: reminder.intervalMinutes
     });
   }
+
+  await showPendingReminder();
 }
 
 async function snoozeReminder(reminderId) {
@@ -241,6 +341,8 @@ async function snoozeReminder(reminderId) {
   chrome.alarms.create(getSnoozeAlarmName(reminderId), {
     delayInMinutes: SNOOZE_MINUTES
   });
+
+  await showPendingReminder();
 }
 
 async function playSound() {
