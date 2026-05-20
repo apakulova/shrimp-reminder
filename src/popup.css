@@ -165,11 +165,26 @@ h1 {
   white-space: nowrap;
 }
 
-.summary-text span {
-  display: block;
+.summary-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  align-items: baseline;
+}
+
+.summary-interval,
+.summary-countdown {
   color: #b2abb9;
   font-size: 14px;
   line-height: 1.2;
+}
+
+.summary-countdown {
+  color: var(--accent-dark);
+}
+
+.summary-countdown b {
+  font-weight: 800;
 }
 
 .switch {

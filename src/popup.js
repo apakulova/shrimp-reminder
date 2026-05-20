@@ -6,6 +6,8 @@ const elements = {
 
 let settings = normalizeSettings();
 let openReminderId = "";
+let nextFireTimes = {};
+let countdownTimer = 0;
 
 init();
 
@@ -18,7 +20,9 @@ async function init() {
   }
 
   settings = normalizeSettings(state.settings);
+  nextFireTimes = state.nextFireTimes || {};
   renderReminders();
+  startCountdownTimer();
 
   elements.addReminder.addEventListener("click", addCustomReminder);
 }
@@ -29,6 +33,8 @@ function renderReminders() {
   settings.reminders.forEach((reminder) => {
     elements.reminderList.append(createReminderCard(reminder));
   });
+
+  updateCountdowns();
 }
 
 function createReminderCard(reminder) {
@@ -63,10 +69,20 @@ function createReminderCard(reminder) {
   const title = document.createElement("strong");
   title.textContent = reminder.title;
 
+  const meta = document.createElement("div");
+  meta.className = "summary-meta";
+
   const interval = document.createElement("span");
+  interval.className = "summary-interval";
   interval.textContent = `Раз в ${reminder.intervalMinutes} мин.`;
 
-  summaryText.append(title, interval);
+  const countdown = document.createElement("span");
+  countdown.className = "summary-countdown";
+  countdown.dataset.reminderId = reminder.id;
+  countdown.hidden = true;
+
+  meta.append(interval, countdown);
+  summaryText.append(title, meta);
 
   const switchLabel = document.createElement("label");
   switchLabel.className = "switch";
@@ -229,7 +245,47 @@ async function persistSettings(message) {
   }
 
   settings = normalizeSettings(response.settings);
+  nextFireTimes = response.nextFireTimes || {};
   showStatus(message);
+}
+
+function startCountdownTimer() {
+  if (countdownTimer) {
+    return;
+  }
+
+  countdownTimer = setInterval(updateCountdowns, 15000);
+}
+
+function updateCountdowns() {
+  document.querySelectorAll(".summary-countdown").forEach((element) => {
+    const reminderId = element.dataset.reminderId;
+    const reminder = settings.reminders.find((item) => item.id === reminderId);
+    const nextFireTime = nextFireTimes[reminderId];
+
+    if (!reminder || !reminder.isEnabled || !nextFireTime) {
+      element.hidden = true;
+      element.replaceChildren();
+      return;
+    }
+
+    const minutesLeft = getMinutesLeft(nextFireTime);
+    const time = document.createElement("b");
+    time.textContent = `${minutesLeft} мин.`;
+
+    element.hidden = false;
+    element.replaceChildren("✦ Через ", time);
+  });
+}
+
+function getMinutesLeft(nextFireTime) {
+  const diff = nextFireTime - Date.now();
+
+  if (diff <= 0) {
+    return 0;
+  }
+
+  return Math.max(1, Math.ceil(diff / 60000));
 }
 
 function stopEvent(event) {

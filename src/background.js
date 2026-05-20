@@ -66,14 +66,15 @@ async function handleMessage(message) {
   }
 
   if (message.type === "get-state") {
-    return { ok: true, settings: await getSettings() };
+    const settings = await getSettings();
+    return { ok: true, settings, nextFireTimes: await getNextFireTimes(settings) };
   }
 
   if (message.type === "save-settings") {
     const settings = normalizeSettings(message.settings);
     await chrome.storage.local.set({ [STORAGE_KEYS.settings]: settings });
     await refreshSchedules(settings);
-    return { ok: true, settings };
+    return { ok: true, settings, nextFireTimes: await getNextFireTimes(settings) };
   }
 
   if (message.type === "test-reminder") {
@@ -136,6 +137,28 @@ async function refreshSchedules(settings) {
         periodInMinutes: reminder.intervalMinutes
       });
     });
+}
+
+async function getNextFireTimes(settings) {
+  const entries = await Promise.all(
+    settings.reminders.map(async (reminder) => {
+      if (!reminder.isEnabled) {
+        return [reminder.id, 0];
+      }
+
+      const [scheduleAlarm, snoozeAlarm] = await Promise.all([
+        chrome.alarms.get(getScheduleAlarmName(reminder.id)),
+        chrome.alarms.get(getSnoozeAlarmName(reminder.id))
+      ]);
+      const alarmTimes = [scheduleAlarm, snoozeAlarm]
+        .filter(Boolean)
+        .map((alarm) => alarm.scheduledTime);
+
+      return [reminder.id, alarmTimes.length ? Math.min(...alarmTimes) : 0];
+    })
+  );
+
+  return Object.fromEntries(entries);
 }
 
 async function showReminder(reminder, source) {
